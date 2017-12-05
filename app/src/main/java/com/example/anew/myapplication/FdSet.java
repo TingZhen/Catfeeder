@@ -1,5 +1,6 @@
 package com.example.anew.myapplication;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,14 +26,13 @@ public class FdSet extends Activity {
     DatabaseReference myRef = FirebaseDatabase.getInstance().getReferenceFromUrl("https://myapplication-84cfa.firebaseio.com/FdSet");
     String H;
     String M;
-    TextView textView = (TextView)findViewById(R.id.textView);
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fdset);
         Button fdset = (Button) findViewById(R.id.setadd);
         fdset.setOnClickListener(new ButtonClickListener());
-
         // Setup Firebase library
         //必須完成Firebase Setup後才能使用
         //取得Firebase連結
@@ -45,32 +45,27 @@ public class FdSet extends Activity {
 
         @Override
         public void onClick(View view) {
-                EditText weight = (EditText) findViewById(R.id.weightset);
-                final TimePicker timeset = (TimePicker) findViewById(R.id.fdtimeset);
-                timeset.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-                    @Override
-                    public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                        // TODO Auto-generated method stub
-                        //取得 hour的值，透過TimeFix方法。轉換成String.並初始H。
-                        H = TimeFix(hourOfDay);
-                        //取得 minute的值，透過TimeFix方法。轉換成String.並初始M。
-                        M = TimeFix(minute);
-                    }
-                });
+            EditText weight = (EditText) findViewById(R.id.weightset);
+            final TimePicker timeset = (TimePicker) findViewById(R.id.fdtimeset);
+            int h = timeset.getCurrentHour();
+            int m = timeset.getCurrentMinute();
+            if (h >= 10)
+                H =  String.valueOf(h);
+            else
+                H= "0"+String.valueOf(h);
 
-                feedset set = new feedset(H+":"+M, Integer.parseInt(weight.getText().toString()));
-                myRef.push().setValue(set);
+            if (m >= 10)
+                M =  String.valueOf(m);
+            else
+                M= "0"+String.valueOf(m);
 
-                Intent intent = new Intent();
-                intent.setClass(FdSet.this, MainActivity.class);
-                startActivity(intent);
+            feedset set = new feedset(H + ":" + M, Integer.parseInt(weight.getText().toString()));
+            myRef.push().setValue(set);
+
+            Intent intent = new Intent();
+            intent.setClass(FdSet.this, MainActivity.class);
+            startActivity(intent);
         }
     }
-
-    private static String TimeFix(int c){
-        if (c >= 10)
-            return String.valueOf(c);
-        else
-            return "0" + String.valueOf(c);
-    }
 }
+
